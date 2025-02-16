@@ -1,7 +1,7 @@
 // Dynamic Content Loading
 async function loadContent() {
     try {
-        const response = await fetch('/assets/data/content.json');
+        const response = await fetch('./assets/data/content.json');
         const data = await response.json();
         
         // Load hero section content
