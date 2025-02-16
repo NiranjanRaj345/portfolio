@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "name": "John Doe",
+    "tagline": "Building Scalable Solutions, One Line of Code at a Time...",
+    "social_links": {
+      "github": "https://github.com/johndoe",
+      "linkedin": "https://linkedin.com/in/johndoe",
+      "twitter": "https://twitter.com/johndoe"
+    }
+  },
+  "projects": [
+    {
+      "title": "AI-Powered Chatbot",
+      "description": "An intelligent chatbot leveraging NLP and GPT-4 for human-like conversations",
+      "problem": "Traditional chatbots lack context understanding and natural conversation flow",
+      "solution": "Implemented advanced NLP with GPT-4 for more natural and context-aware responses",
+      "tech": ["Python", "Flask", "OpenAI API", "Redis", "Docker"],
+      "demo": "https://chatbot-demo.example.com",
+      "github": "https://github.com/johndoe/chatbot",
+      "image": "assets/images/chatbot-project.jpg"
+    },
+    {
+      "title": "E-Commerce Platform",
+      "description": "A modern e-commerce platform with real-time inventory management",
+      "problem": "Small businesses struggle with inventory management and online presence",
+      "solution": "Created a scalable platform with real-time inventory tracking and analytics",
+      "tech": ["React", "Node.js", "MongoDB", "AWS", "Stripe"],
+      "demo": "https://ecommerce-demo.example.com",
+      "github": "https://github.com/johndoe/ecommerce",
+      "image": "assets/images/ecommerce-project.jpg"
+    }
+  ],
+  "skills": [
+    {
+      "name": "JavaScript",
+      "level": "Advanced",
+      "category": "Frontend",
+      "proficiency": 90
+    },
+    {
+      "name": "Python",
+      "level": "Advanced",
+      "category": "Backend",
+      "proficiency": 85
+    },
+    {
+      "name": "React",
+      "level": "Advanced",
+      "category": "Frontend",
+      "proficiency": 88
+    },
+    {
+      "name": "Node.js",
+      "level": "Intermediate",
+      "category": "Backend",
+      "proficiency": 75
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect",
+      "issuer": "Amazon Web Services",
+      "year": 2024,
+      "link": "https://aws.amazon.com/certification/"
+    },
+    {
+      "name": "Google Cloud Professional Developer",
+      "issuer": "Google",
+      "year": 2023,
+      "link": "https://cloud.google.com/certification"
+    }
+  ],
+  "about": {
+    "bio": "I am a passionate full-stack developer with a keen interest in AI and cloud technologies. With over 5 years of experience, I specialize in building scalable web applications and implementing AI solutions.",
+    "hobbies": ["Competitive Programming", "Open Source Contributing", "Tech Blogging", "Mountain Biking"],
+    "learning": ["Rust Programming", "Machine Learning with PyTorch", "WebAssembly"],
+    "funFacts": [
+      "Contributed to over 20 open-source projects",
+      "Built my first website at age 14",
+      "Can solve a Rubik's cube in under 2 minutes"
+    ],
+    "timeline": [
+      {
+        "year": "2024",
+        "title": "Senior Full Stack Developer",
+        "company": "Tech Innovators Inc",
+        "description": "Leading a team of developers building cloud-native applications"
+      },
+      {
+        "year": "2022",
+        "title": "Full Stack Developer",
+        "company": "Digital Solutions Ltd",
+        "description": "Developed and maintained enterprise web applications"
+      }
+    ]
+  },
+  "contact": {
+    "email": "john.doe@example.com",
+    "phone": "+1234567890",
+    "location": "San Francisco, CA",
+    "socialMedia": {
+      "discord": "johndoe#1234",
+      "github": "https://github.com/johndoe",
+      "linkedin": "https://linkedin.com/in/johndoe",
+      "twitter": "https://twitter.com/johndoe"
+    }
+  }
+}

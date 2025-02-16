@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills & Certifications - Portfolio</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <style>
+        .skills-container {
+            max-width: 1200px;
+            margin: 120px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* Filter Buttons */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Flip Card */
+        .skill-card {
+            perspective: 1000px;
+            height: 200px;
+        }
+
+        .skill-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .skill-card:hover .skill-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .skill-card-front,
+        .skill-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 1.5rem;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-card-front {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .skill-card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .skill-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: var(--background-color);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--primary-color);
+            width: 0;
+            transition: width 1.5s ease;
+        }
+
+        /* Certifications Section */
+        .certifications {
+            margin-top: 4rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .cert-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .cert-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .cert-title {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .cert-issuer {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .cert-year {
+            display: inline-block;
+            background: var(--background-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .skills-container {
+                margin-top: 100px;
+            }
+            
+            .filter-buttons {
+                gap: 0.5rem;
+            }
+            
+            .filter-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="skills.html" class="active">Skills</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+        <div class="nav-indicator"></div>
+    </nav>
+
+    <div class="skills-container">
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-category="all">All</button>
+            <!-- Dynamically loaded categories -->
+        </div>
+
+        <!-- Skills Grid -->
+        <div class="skills-grid">
+            <!-- Dynamically loaded skills -->
+        </div>
+
+        <!-- Certifications -->
+        <div class="certifications">
+            <h2 class="section-title">Certifications</h2>
+            <div class="cert-grid">
+                <!-- Dynamically loaded certifications -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadSkillsAndCerts() {
+            try {
+                const response = await fetch('../assets/data/content.json');
+                const data = await response.json();
+                
+                // Load categories
+                const categories = [...new Set(data.skills.map(skill => skill.category))];
+                const filterButtons = document.querySelector('.filter-buttons');
+                
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'filter-btn';
+                    button.textContent = category;
+                    button.dataset.category = category;
+                    button.addEventListener('click', () => filterSkills(category));
+                    filterButtons.appendChild(button);
+                });
+
+                // Load skills
+                loadSkills(data.skills);
+
+                // Load certifications
+                loadCertifications(data.certifications);
+            } catch (error) {
+                console.error('Error loading skills and certifications:', error);
+            }
+        }
+
+        function loadSkills(skills) {
+            const skillsGrid = document.querySelector('.skills-grid');
+            skillsGrid.innerHTML = '';
+
+            skills.forEach(skill => {
+                const skillCard = document.createElement('div');
+                skillCard.className = 'skill-card flip-in';
+                skillCard.dataset.category = skill.category;
+                
+                skillCard.innerHTML = `
+                    <div class="skill-card-inner">
+                        <div class="skill-card-front">
+                            <i class="fas fa-code skill-icon"></i>
+                            <h3 class="skill-name">${skill.name}</h3>
+                            <span class="skill-level">${skill.level}</span>
+                        </div>
+                        <div class="skill-card-back">
+                            <h3 class="skill-name">${skill.name}</h3>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: ${skill.proficiency}%"></div>
+                            </div>
+                            <p>Proficiency: ${skill.proficiency}%</p>
+                        </div>
+                    </div>
+                `;
+
+                skillsGrid.appendChild(skillCard);
+            });
+        }
+
+        function loadCertifications(certifications) {
+            const certGrid = document.querySelector('.cert-grid');
+            
+            certifications.forEach(cert => {
+                const certCard = document.createElement('div');
+                certCard.className = 'cert-card page-transition';
+                
+                certCard.innerHTML = `
+                    <h3 class="cert-title">${cert.name}</h3>
+                    <p class="cert-issuer">${cert.issuer}</p>
+                    <span class="cert-year">${cert.year}</span>
+                    <a href="${cert.link}" target="_blank" style="display: block; margin-top: 1rem;">
+                        <i class="fas fa-external-link-alt"></i> View Certificate
+                    </a>
+                `;
+
+                certGrid.appendChild(certCard);
+            });
+        }
+
+        function filterSkills(category) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.skill-card');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                }
+            });
+
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSkillsAndCerts();
+            
+            // Add Font Awesome if not already added
+            if (!document.querySelector('#font-awesome')) {
+                const fontAwesome = document.createElement('link');
+                fontAwesome.id = 'font-awesome';
+                fontAwesome.rel = 'stylesheet';
+                fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                document.head.appendChild(fontAwesome);
+            }
+        });
+    </script>
+</body>
+</html>

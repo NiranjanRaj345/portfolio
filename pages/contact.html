@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Portfolio</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <style>
+        .contact-container {
+            max-width: 1200px;
+            margin: 120px auto 40px;
+            padding: 0 20px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Contact Form */
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        /* Connect Section */
+        .connect-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .connect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .connect-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .connect-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .connect-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .connect-label {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        /* QR Code Section */
+        .qr-section {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Buttons */
+        .submit-btn,
+        .email-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .submit-btn:hover,
+        .email-btn:hover {
+            transform: translateY(-3px);
+            background-color: #0056b3;
+        }
+
+        .email-template-btn {
+            display: block;
+            margin: 2rem auto;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+            </ul>
+        </div>
+        <div class="nav-indicator"></div>
+    </nav>
+
+    <div class="contact-container">
+        <div class="contact-grid">
+            <!-- Contact Form -->
+            <div class="contact-form page-transition">
+                <h2>Get In Touch</h2>
+                <form id="contactForm" onsubmit="return handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                        <div class="error-message" id="nameError">Please enter your name</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error-message" id="emailError">Please enter a valid email address</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required></textarea>
+                        <div class="error-message" id="messageError">Please enter your message</div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+
+            <!-- Connect Section -->
+            <div class="connect-section page-transition">
+                <h2>Let's Connect</h2>
+                <div class="connect-grid">
+                    <!-- Dynamically loaded social links -->
+                </div>
+
+                <!-- Email Template Button -->
+                <a href="#" class="email-btn email-template-btn" id="emailTemplateBtn">
+                    <i class="fas fa-envelope"></i> Use Email Template
+                </a>
+
+                <!-- QR Code Section -->
+                <div class="qr-section">
+                    <h3>Scan to Connect</h3>
+                    <div class="qr-code" id="qrCode">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Load contact information and social links
+        async function loadContactInfo() {
+            try {
+                const response = await fetch('../assets/data/content.json');
+                const data = await response.json();
+                
+                // Load social links
+                const connectGrid = document.querySelector('.connect-grid');
+                Object.entries(data.contact.socialMedia).forEach(([platform, url]) => {
+                    const connectItem = document.createElement('a');
+                    connectItem.href = url;
+                    connectItem.target = '_blank';
+                    connectItem.className = 'connect-item';
+                    
+                    connectItem.innerHTML = `
+                        <i class="fab fa-${platform.toLowerCase()} connect-icon"></i>
+                        <div class="connect-label">${platform}</div>
+                    `;
+                    
+                    connectGrid.appendChild(connectItem);
+                });
+
+                // Generate QR Code (using LinkedIn URL as an example)
+                new QRCode(document.getElementById("qrCode"), {
+                    text: data.contact.socialMedia.linkedin,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#007bff",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                // Set up email template button
+                document.getElementById('emailTemplateBtn').href = `mailto:${data.contact.email}?subject=Let's Connect&body=Hi ${data.hero.name},%0D%0A%0D%0AI came across your portfolio and would love to connect!%0D%0A%0D%0ABest regards,%0D%0A[Your Name]`;
+            } catch (error) {
+                console.error('Error loading contact information:', error);
+            }
+        }
+
+        // Form validation and submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const message = document.getElementById('message');
+            let isValid = true;
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.style.display = 'none';
+            });
+
+            // Validate name
+            if (!name.value.trim()) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate message
+            if (!message.value.trim()) {
+                document.getElementById('messageError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // In a real application, you would send this data to a server
+                alert('Thank you for your message! I will get back to you soon.');
+                event.target.reset();
+            }
+
+            return false;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadContactInfo();
+            
+            // Add Font Awesome if not already added
+            if (!document.querySelector('#font-awesome')) {
+                const fontAwesome = document.createElement('link');
+                fontAwesome.id = 'font-awesome';
+                fontAwesome.rel = 'stylesheet';
+                fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                document.head.appendChild(fontAwesome);
+            }
+        });
+    </script>
+</body>
+</html>
