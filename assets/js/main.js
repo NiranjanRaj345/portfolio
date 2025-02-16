@@ -39,11 +39,20 @@ function initNavbar() {
     window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
         
-        // Add/remove scrolled class based on scroll position
-        if (currentScroll > 50) {
+        // Handle navbar visibility based on scroll direction
+        if (currentScroll > lastScroll && currentScroll > 50) {
+            // Scrolling down - shrink navbar
             navbar.classList.add('scrolled');
+            navbar.style.transform = 'translateY(-100%)';
         } else {
+            // Scrolling up - expand navbar
             navbar.classList.remove('scrolled');
+            navbar.style.transform = 'translateY(0)';
+            
+            // Still add scrolled class if we're not at the top
+            if (currentScroll > 50) {
+                navbar.classList.add('scrolled');
+            }
         }
         
         // Update nav indicator position
@@ -56,6 +65,14 @@ function initNavbar() {
         
         lastScroll = currentScroll;
     });
+
+    // Initialize nav indicator position
+    const activeLink = document.querySelector('.nav-links a.active');
+    if (activeLink) {
+        const indicator = document.querySelector('.nav-indicator');
+        indicator.style.width = `${activeLink.offsetWidth}px`;
+        indicator.style.left = `${activeLink.offsetLeft}px`;
+    }
 }
 
 // Smooth Scrolling
