@@ -1,7 +1,7 @@
 // Load contact information and social links
 async function loadContactInfo() {
     try {
-        const response = await fetch('../assets/data/content.json');
+        const response = await fetch(utils.getContentPath());
         const data = await response.json();
         
         // Load social links

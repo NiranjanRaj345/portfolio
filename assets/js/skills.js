@@ -1,6 +1,6 @@
 async function loadSkillsAndCerts() {
     try {
-        const response = await fetch('../assets/data/content.json');
+        const response = await fetch(utils.getContentPath());
         const data = await response.json();
         
         // Load categories

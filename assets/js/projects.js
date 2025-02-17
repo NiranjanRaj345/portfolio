@@ -1,7 +1,7 @@
 // Load and display projects
 async function loadProjects() {
     try {
-        const response = await fetch('../assets/data/content.json');
+        const response = await fetch(utils.getContentPath());
         const data = await response.json();
         const projectsGrid = document.querySelector('.projects-grid');
         
