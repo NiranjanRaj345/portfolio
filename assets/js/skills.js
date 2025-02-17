@@ -7,11 +7,18 @@ async function loadSkillsAndCerts() {
         const categories = [...new Set(data.skills.map(skill => skill.category))];
         const filterButtons = document.querySelector('.filter-buttons');
         
+        // Add event listener to the existing "All" button
+        const allButton = filterButtons.querySelector('.filter-btn[data-category="all"]');
+        if (allButton) {
+            allButton.addEventListener('click', () => filterSkills('all'));
+        }
+        
+        // Add other category buttons
         categories.forEach(category => {
             const button = document.createElement('button');
             button.className = 'filter-btn';
             button.textContent = category;
-            button.dataset.category = category;
+            button.dataset.category = category.toLowerCase();
             button.addEventListener('click', () => filterSkills(category));
             filterButtons.appendChild(button);
         });
@@ -21,6 +28,9 @@ async function loadSkillsAndCerts() {
 
         // Load certifications
         loadCertifications(data.certifications);
+
+        // Set initial state to show all skills
+        filterSkills('all');
     } catch (error) {
         console.error('Error loading skills and certifications:', error);
     }
@@ -33,7 +43,7 @@ function loadSkills(skills) {
     skills.forEach(skill => {
         const skillCard = document.createElement('div');
         skillCard.className = 'skill-card flip-in';
-        skillCard.dataset.category = skill.category;
+        skillCard.dataset.category = skill.category.toLowerCase();
         
         skillCard.innerHTML = `
             <div class="skill-card-inner">
@@ -79,19 +89,29 @@ function loadCertifications(certifications) {
 function filterSkills(category) {
     const buttons = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.skill-card');
+    const currentCategory = category.toLowerCase();
 
+    // Update active state of buttons
     buttons.forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.category === category) {
+        if (btn.dataset.category.toLowerCase() === currentCategory) {
             btn.classList.add('active');
         }
     });
 
+    // Show/hide cards based on category
     cards.forEach(card => {
-        if (category === 'all' || card.dataset.category === category) {
+        if (currentCategory === 'all') {
             card.style.display = 'block';
+            card.classList.add('flip-in');
         } else {
-            card.style.display = 'none';
+            if (card.dataset.category.toLowerCase() === currentCategory) {
+                card.style.display = 'block';
+                card.classList.add('flip-in');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('flip-in');
+            }
         }
     });
 }
@@ -100,9 +120,4 @@ function filterSkills(category) {
 document.addEventListener('DOMContentLoaded', async () => {
     await includeHTML();
     loadSkillsAndCerts();
-
-    // Initialize click handler for "All" button
-    document.querySelector('.filter-btn[data-category="all"]').addEventListener('click', () => {
-        filterSkills('all');
-    });
 });
