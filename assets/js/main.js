@@ -125,15 +125,36 @@ function resetTypingAnimation() {
 
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
-    loadContent();
-    initNavbar();
-    initSmoothScroll();
-    updateActiveNavLink();
-    
-    // Reset typing animation when it ends
-    const typing = document.querySelector('.typing');
-    typing.addEventListener('animationend', resetTypingAnimation);
+    includeHTML().then(() => {
+        loadContent();
+        initNavbar();
+        initSmoothScroll();
+        updateActiveNavLink();
+
+        // Reset typing animation when it ends
+        const typing = document.querySelector('.typing');
+        typing.addEventListener('animationend', resetTypingAnimation);
+    });
 });
+
+// Function to include HTML content
+async function includeHTML() {
+    const elements = document.querySelectorAll('[data-include]');
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        const file = element.getAttribute('data-include');
+        if (file) {
+            try {
+                const response = await fetch(file);
+                const html = await response.text();
+                element.innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching HTML:', error);
+                element.innerHTML = 'Error loading content.';
+            }
+        }
+    }
+}
 
 // Handle page transitions
 window.addEventListener('pageshow', (event) => {

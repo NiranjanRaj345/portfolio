@@ -185,18 +185,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="projects.html">Projects</a></li>
-                <li><a href="skills.html" class="active">Skills</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </div>
-        <div class="nav-indicator"></div>
-    </nav>
+    <div data-include="../assets/components/navbar.html"></div>
 
     <div class="skills-container">
         <!-- Filter Buttons -->
@@ -321,6 +310,11 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadSkillsAndCerts();
+
+            // Initialize click handler for "All" button
+            document.querySelector('.filter-btn[data-category="all"]').addEventListener('click', () => {
+                filterSkills('all');
+            });
             
             // Add Font Awesome if not already added
             if (!document.querySelector('#font-awesome')) {
