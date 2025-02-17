@@ -1,35 +1,21 @@
-// Dynamic Content Loading
-async function loadContent() {
-    try {
-        const response = await fetch('./assets/data/content.json');
-        const data = await response.json();
-        
-        // Load hero section content
-        document.querySelector('.hero-name').textContent = data.hero.name;
-        const tagline = document.querySelector('.typing');
-        tagline.textContent = data.hero.tagline;
-        
-        // Load social links
-        const socialLinksContainer = document.querySelector('.social-links');
-        socialLinksContainer.innerHTML = Object.entries(data.hero.social_links)
-            .map(([platform, url]) => `
-                <a href="${url}" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-${platform.toLowerCase()}"></i>
-                </a>
-            `).join('');
-        
-        // Add Font Awesome for social icons
-        if (!document.querySelector('#font-awesome')) {
-            const fontAwesome = document.createElement('link');
-            fontAwesome.id = 'font-awesome';
-            fontAwesome.rel = 'stylesheet';
-            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-            document.head.appendChild(fontAwesome);
+// Include HTML content
+async function includeHTML() {
+    const elements = document.querySelectorAll('[data-include]');
+    for (let element of elements) {
+        const file = element.getAttribute('data-include');
+        if (file) {
+            try {
+                const response = await fetch(file);
+                const html = await response.text();
+                element.innerHTML = html;
+            } catch (error) {
+                utils.handleError(error, 'includeHTML');
+                element.innerHTML = 'Error loading content.';
+            }
         }
-    } catch (error) {
-        console.error('Error loading content:', error);
     }
 }
+
 
 // Navbar Scroll Behavior
 function initNavbar() {
@@ -124,37 +110,16 @@ function resetTypingAnimation() {
 }
 
 // Initialize Everything
-document.addEventListener('DOMContentLoaded', () => {
-    includeHTML().then(() => {
-        loadContent();
-        initNavbar();
-        initSmoothScroll();
-        updateActiveNavLink();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load Font Awesome
+    utils.loadFontAwesome();
 
-        // Reset typing animation when it ends
-        const typing = document.querySelector('.typing');
-        typing.addEventListener('animationend', resetTypingAnimation);
-    });
+    // Initialize core functionalities
+    await includeHTML();
+    initNavbar();
+    initSmoothScroll();
+    updateActiveNavLink();
 });
-
-// Function to include HTML content
-async function includeHTML() {
-    const elements = document.querySelectorAll('[data-include]');
-    for (let i = 0; i < elements.length; i++) {
-        const element = elements[i];
-        const file = element.getAttribute('data-include');
-        if (file) {
-            try {
-                const response = await fetch(file);
-                const html = await response.text();
-                element.innerHTML = html;
-            } catch (error) {
-                console.error('Error fetching HTML:', error);
-                element.innerHTML = 'Error loading content.';
-            }
-        }
-    }
-}
 
 // Handle page transitions
 window.addEventListener('pageshow', (event) => {
