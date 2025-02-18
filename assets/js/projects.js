@@ -9,7 +9,7 @@ async function loadProjects() {
             const projectCard = document.createElement('div');
             projectCard.className = 'project-card page-transition';
             projectCard.innerHTML = `
-                <img src="${utils.formatImagePath(project.image)}" alt="${project.title}" class="project-image">
+                <img src="../${project.image}" alt="${project.title}" class="project-image">
                 <div class="project-content">
                     <h3 class="project-title">${project.title}</h3>
                     <p class="project-description">${project.description}</p>
