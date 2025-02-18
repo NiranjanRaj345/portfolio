@@ -1,51 +1,75 @@
-// Mobile Navigation Handler
+// Mobile Navigation Controller
 class MobileNav {
     constructor() {
         this.button = document.querySelector('.mobile-menu-btn');
         this.menu = document.querySelector('.nav-links');
         this.isOpen = false;
+        this.touchStartX = 0;
+        this.boundHandleClick = this.handleClick.bind(this);
+        this.boundHandleKeydown = this.handleKeydown.bind(this);
+        this.boundHandleResize = debounce(this.handleResize.bind(this), 250);
         
-        utils.performance.start('nav-init');
-        this.init();
-        utils.performance.end('nav-init');
+        if (this.validateElements()) {
+            this.init();
+        }
+    }
+
+    validateElements() {
+        if (!this.button || !this.menu) {
+            utils.handleError(
+                new Error('Required navigation elements not found'),
+                'MobileNav'
+            );
+            return false;
+        }
+        return true;
     }
 
     init() {
-        if (!this.button || !this.menu) return;
-
-        // Initialize Touch Swipe
-        utils.enableTouchInteractions(this.menu, {
-            move: ({ deltaX }) => {
-                if (this.isOpen && deltaX < -50) {
-                    this.closeMenu();
-                }
-            }
-        });
-
-        // Event Listeners
-        this.button.addEventListener('click', () => this.toggleMenu());
+        // Initialize touch events
+        this.initTouchEvents();
         
-        document.addEventListener('click', (e) => {
-            if (this.isOpen && !this.menu.contains(e.target) && !this.button.contains(e.target)) {
-                this.closeMenu();
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOpen) {
-                this.closeMenu();
-            }
-        });
-
-        // Responsive Handling
-        window.addEventListener('resize', this.debounce(() => {
-            if (window.innerWidth > 768 && this.isOpen) {
-                this.closeMenu();
-            }
-        }, 250));
+        // Set up event listeners
+        this.button.addEventListener('click', () => this.toggleMenu());
+        document.addEventListener('click', this.boundHandleClick);
+        document.addEventListener('keydown', this.boundHandleKeydown);
+        window.addEventListener('resize', this.boundHandleResize);
 
         this.updateARIA();
         this.setActiveLink();
+    }
+
+    initTouchEvents() {
+        this.menu.addEventListener('touchstart', (e) => {
+            this.touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        this.menu.addEventListener('touchmove', (e) => {
+            if (!this.isOpen) return;
+            
+            const deltaX = this.touchStartX - e.touches[0].clientX;
+            if (deltaX > 50) { // Swipe threshold
+                this.closeMenu();
+            }
+        }, { passive: true });
+    }
+
+    handleClick(e) {
+        if (this.isOpen && !this.menu.contains(e.target) && !this.button.contains(e.target)) {
+            this.closeMenu();
+        }
+    }
+
+    handleKeydown(e) {
+        if (e.key === 'Escape' && this.isOpen) {
+            this.closeMenu();
+        }
+    }
+
+    handleResize() {
+        if (window.innerWidth > 768 && this.isOpen) {
+            this.closeMenu();
+        }
     }
 
     toggleMenu() {
@@ -55,7 +79,6 @@ class MobileNav {
     openMenu() {
         this.isOpen = true;
         this.menu.classList.add('active');
-        this.button.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
         this.updateARIA();
     }
@@ -63,7 +86,6 @@ class MobileNav {
     closeMenu() {
         this.isOpen = false;
         this.menu.classList.remove('active');
-        this.button.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
         this.updateARIA();
     }
@@ -74,37 +96,42 @@ class MobileNav {
     }
 
     setActiveLink() {
-        const links = this.menu.querySelectorAll('a');
-        const currentPath = window.location.pathname;
-        
-        links.forEach(link => {
-            // Get the normalized paths for comparison
-            const linkPath = utils.getNavPath(link.getAttribute('href'));
-            const normalizedCurrentPath = currentPath.endsWith('/') 
-                ? currentPath + 'index.html' 
-                : currentPath;
+        try {
+            const links = this.menu.querySelectorAll('a');
+            const currentPath = window.location.pathname;
             
-            if (normalizedCurrentPath.endsWith(linkPath)) {
-                link.classList.add('active');
-                link.setAttribute('aria-current', 'page');
-            }
-        });
+            links.forEach(link => {
+                const linkPath = utils.getNavPath(link.getAttribute('href'));
+                const normalizedCurrentPath = currentPath.endsWith('/') 
+                    ? currentPath + 'index.html' 
+                    : currentPath;
+                
+                const isActive = normalizedCurrentPath.endsWith(linkPath);
+                link.classList.toggle('active', isActive);
+                link.setAttribute('aria-current', isActive ? 'page' : 'false');
+            });
+        } catch (error) {
+            utils.handleError(error, 'MobileNav.setActiveLink');
+        }
     }
 
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    // Cleanup method to remove event listeners
+    destroy() {
+        document.removeEventListener('click', this.boundHandleClick);
+        document.removeEventListener('keydown', this.boundHandleKeydown);
+        window.removeEventListener('resize', this.boundHandleResize);
     }
 }
 
 // Initialize mobile navigation when DOM is ready
+let mobileNav;
 document.addEventListener('DOMContentLoaded', () => {
-    const mobileNav = new MobileNav();
+    mobileNav = new MobileNav();
+});
+
+// Cleanup on page unload
+window.addEventListener('unload', () => {
+    if (mobileNav) {
+        mobileNav.destroy();
+    }
 });

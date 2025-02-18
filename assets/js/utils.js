@@ -9,71 +9,66 @@ function loadFontAwesome() {
     }
 }
 
-// Path handling for content.json based on current page depth
-function getContentPath() {
-    const basePath = window.location.hostname.includes('.pages.dev') 
-        ? '/portfolio'  // For Cloudflare Pages deployment
-        : '';          // For root deployment
+// Core path utilities
+const pathUtils = {
+    getBasePath() {
+        return window.location.hostname.includes('.pages.dev') ? '/portfolio' : '';
+    },
 
-    const isInPagesDir = window.location.pathname.includes('/pages/');
-    return isInPagesDir 
-        ? '../assets/data/content.json'
-        : `${basePath}/assets/data/content.json`;
-}
+    isInPagesDirectory() {
+        return window.location.pathname.includes('/pages/');
+    },
 
-// Format relative image paths based on page location
-function formatImagePath(path) {
-    // Get the base path of the site
-    const basePath = window.location.hostname.includes('.pages.dev') 
-        ? '/portfolio'  // For Cloudflare Pages deployment
-        : '';          // For root deployment
+    normalizePath(path) {
+        return path.startsWith('/') ? path.slice(1) : path;
+    },
 
-    // Remove leading slash if present
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-
-    // If we're in the pages directory, go up one level
-    if (window.location.pathname.includes('/pages/')) {
-        return `../${cleanPath}`;
+    resolvePath(path, options = {}) {
+        const basePath = this.getBasePath();
+        const cleanPath = this.normalizePath(path);
+        
+        if (this.isInPagesDirectory() && !options.absolute) {
+            return `../${cleanPath}`;
+        }
+        
+        return `${basePath}/${cleanPath}`;
     }
+};
 
-    // Return the path with the correct base
-    return `${basePath}/${cleanPath}`;
+// Get content.json path
+function getContentPath() {
+    return pathUtils.resolvePath('assets/data/content.json');
 }
 
-// Generic error handler
+// Format image path
+function formatImagePath(path) {
+    return pathUtils.resolvePath(path);
+}
+
+// Enhanced error handler with console grouping
 function handleError(error, context) {
-    console.error(`Error in ${context}:`, error);
-    // You could add more error handling logic here
+    console.group(`Error in ${context}`);
+    console.error(error);
+    console.trace('Stack trace:');
+    console.groupEnd();
 }
 
-// Utility function to create elements with classes
-function createElement(tag, className, innerHTML = '') {
+// Enhanced element creator with optional attributes
+function createElement(tag, className = '', options = {}) {
     const element = document.createElement(tag);
     if (className) element.className = className;
-    if (innerHTML) element.innerHTML = innerHTML;
+    if (options.innerHTML) element.innerHTML = options.innerHTML;
+    if (options.attributes) {
+        Object.entries(options.attributes).forEach(([key, value]) => {
+            element.setAttribute(key, value);
+        });
+    }
     return element;
 }
 
-// Get correct path for navigation
+// Get navigation path
 function getNavPath(path) {
-    // Get the base path of the site
-    const basePath = window.location.hostname.includes('.pages.dev') 
-        ? '/portfolio'  // For Cloudflare Pages deployment
-        : '';          // For root deployment
-
-    // Remove leading slash if present
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-
-    // If we're in the pages directory and the path is not absolute, go up one level
-    const isInPagesDir = window.location.pathname.includes('/pages/');
-    const isAbsolutePath = path.startsWith('/');
-
-    if (isInPagesDir && !isAbsolutePath) {
-        return `../${cleanPath}`;
-    }
-
-    // Return the path with the correct base
-    return `${basePath}/${cleanPath}`;
+    return pathUtils.resolvePath(path, { absolute: path.startsWith('/') });
 }
 
 // Export utilities
