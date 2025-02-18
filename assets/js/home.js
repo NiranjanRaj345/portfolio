@@ -22,13 +22,27 @@ async function loadHeroContent() {
     }
 }
 
+// Handle quick link clicks
+function initQuickLinks() {
+    const cards = document.querySelectorAll('.quick-links .card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const href = card.dataset.href;
+            if (href) {
+                window.location.href = utils.getNavPath(href);
+            }
+        });
+    });
+}
+
 // Initialize home page
 document.addEventListener('DOMContentLoaded', async () => {
     await includeHTML();
     loadHeroContent();
+    initQuickLinks();
 
     // Initialize particles.js
-    particlesJS.load('particles-js', 'assets/js/particles-config.json', function() {
+    particlesJS.load('particles-js', utils.formatImagePath('assets/js/particles-config.json'), function() {
         console.log('particles.js loaded');
     });
 

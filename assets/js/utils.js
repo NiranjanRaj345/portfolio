@@ -11,13 +11,33 @@ function loadFontAwesome() {
 
 // Path handling for content.json based on current page depth
 function getContentPath() {
-    const path = window.location.pathname;
-    return path.includes('/pages/') ? '../assets/data/content.json' : './assets/data/content.json';
+    const basePath = window.location.hostname.includes('.pages.dev') 
+        ? '/portfolio'  // For Cloudflare Pages deployment
+        : '';          // For root deployment
+
+    const isInPagesDir = window.location.pathname.includes('/pages/');
+    return isInPagesDir 
+        ? '../assets/data/content.json'
+        : `${basePath}/assets/data/content.json`;
 }
 
 // Format relative image paths based on page location
 function formatImagePath(path) {
-    return window.location.pathname.includes('/pages/') ? `../${path}` : path;
+    // Get the base path of the site
+    const basePath = window.location.hostname.includes('.pages.dev') 
+        ? '/portfolio'  // For Cloudflare Pages deployment
+        : '';          // For root deployment
+
+    // Remove leading slash if present
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+    // If we're in the pages directory, go up one level
+    if (window.location.pathname.includes('/pages/')) {
+        return `../${cleanPath}`;
+    }
+
+    // Return the path with the correct base
+    return `${basePath}/${cleanPath}`;
 }
 
 // Generic error handler
@@ -34,11 +54,57 @@ function createElement(tag, className, innerHTML = '') {
     return element;
 }
 
+// Get correct path for navigation
+function getNavPath(path) {
+    // Get the base path of the site
+    const basePath = window.location.hostname.includes('.pages.dev') 
+        ? '/portfolio'  // For Cloudflare Pages deployment
+        : '';          // For root deployment
+
+    // Remove leading slash if present
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+    // If we're in the pages directory and the path is not absolute, go up one level
+    const isInPagesDir = window.location.pathname.includes('/pages/');
+    const isAbsolutePath = path.startsWith('/');
+
+    if (isInPagesDir && !isAbsolutePath) {
+        return `../${cleanPath}`;
+    }
+
+    // Return the path with the correct base
+    return `${basePath}/${cleanPath}`;
+}
+
 // Export utilities
 window.utils = {
     loadFontAwesome,
     getContentPath,
     formatImagePath,
     handleError,
-    createElement
+    createElement,
+    getNavPath
 };
+
+// Update navbar links based on current location
+function updateNavLinks() {
+    const nav = document.querySelector('.navbar');
+    if (!nav) return;
+
+    const links = nav.querySelectorAll('a');
+    links.forEach(link => {
+        const originalHref = link.getAttribute('href');
+        // Special handling for home link
+        if (link.id === 'home-link') {
+            const basePath = window.location.hostname.includes('.pages.dev') 
+                ? '/portfolio'  // For Cloudflare Pages deployment
+                : '';          // For root deployment
+            link.href = `${basePath}/index.html`;
+        } else {
+            link.href = utils.getNavPath(originalHref);
+        }
+    });
+}
+
+// Add this to window load event
+window.addEventListener('load', updateNavLinks);
