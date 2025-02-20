@@ -1,11 +1,22 @@
 // Core path utilities
 const pathUtils = {
     getBasePath() {
-        return window.location.hostname.includes('.pages.dev') ? '/portfolio' : '';
+        // Check if we're on the production domain
+        if (window.location.hostname.includes('.pages.dev') || 
+            window.location.hostname.includes('.github.io')) {
+            return '/portfolio';
+        }
+        return '';
     },
 
     isInPagesDirectory() {
         return window.location.pathname.includes('/pages/');
+    },
+
+    isRootPage() {
+        const path = window.location.pathname;
+        return path === '/' || path.endsWith('index.html') || 
+               path === '/portfolio/' || path.endsWith('/portfolio/index.html');
     },
 
     normalizePath(path) {
@@ -16,8 +27,14 @@ const pathUtils = {
         const basePath = this.getBasePath();
         const cleanPath = this.normalizePath(path);
         
+        // If we're in the pages directory and not requesting an absolute path
         if (this.isInPagesDirectory() && !options.absolute) {
             return `../${cleanPath}`;
+        }
+        
+        // If we're on the root page (index.html)
+        if (this.isRootPage()) {
+            return `${basePath}/${cleanPath}`;
         }
         
         return `${basePath}/${cleanPath}`;
@@ -28,7 +45,8 @@ const pathUtils = {
 const contentUtils = {
     async load() {
         try {
-            const response = await fetch(getContentPath());
+            const path = pathUtils.resolvePath('assets/data/content.json', { absolute: true });
+            const response = await fetch(path);
             return await response.json();
         } catch (error) {
             handleError(error, 'contentUtils.load');
@@ -117,7 +135,7 @@ const animationUtils = {
 
 // Get content.json path
 function getContentPath() {
-    return pathUtils.resolvePath('assets/data/content.json');
+    return pathUtils.resolvePath('assets/data/content.json', { absolute: true });
 }
 
 // Format image path
