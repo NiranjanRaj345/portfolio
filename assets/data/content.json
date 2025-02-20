@@ -5,7 +5,7 @@
     "social_links": {
       "github": "https://github.com/NiranjanRaj345",
       "linkedin": "https://www.linkedin.com/in/-niranjan/",
-      "twitter": "https://x.com/NiranjanRaj345"
+      "X": "https://x.com/NiranjanRaj345"
     }
   },
   "projects": [
@@ -15,8 +15,8 @@
       "problem": "Traditional chatbots lack context understanding and natural conversation flow",
       "solution": "Implemented advanced NLP with GPT-4 for more natural and context-aware responses",
       "tech": ["Python", "Flask", "OpenAI API", "Redis", "Docker"],
-      "demo": "https://chatbot-demo.example.com",
-      "github": "https://github.com/johndoe/chatbot",
+      "demo": "https://github.com/NiranjanRaj345/chatbot",
+      "github": "https://github.com/NiranjanRaj345/chatbot",
       "image": "assets/images/chatbot-project.jpg"
     },
     {
@@ -25,8 +25,8 @@
       "problem": "Small businesses struggle with inventory management and online presence",
       "solution": "Created a scalable platform with real-time inventory tracking and analytics",
       "tech": ["React", "Node.js", "MongoDB", "AWS", "Stripe"],
-      "demo": "https://ecommerce-demo.example.com",
-      "github": "https://github.com/johndoe/ecommerce",
+      "demo": "https://github.com/NiranjanRaj345/ecommerce",
+      "github": "https://github.com/NiranjanRaj345/ecommerce",
       "image": "assets/images/ecommerce-project.jpg"
     }
   ],
