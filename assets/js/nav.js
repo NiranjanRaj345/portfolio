@@ -1,103 +1,117 @@
-// Mobile Navigation Controller
-class MobileNav {
-    constructor() {
-        this.button = document.querySelector('.mobile-menu-btn');
-        this.menu = document.querySelector('.nav-links');
-        this.isOpen = false;
-        this.touchStartX = 0;
-        this.boundHandleClick = this.handleClick.bind(this);
-        this.boundHandleKeydown = this.handleKeydown.bind(this);
-        this.boundHandleResize = debounce(this.handleResize.bind(this), 250);
-        
-        if (this.validateElements()) {
-            this.init();
-        }
-    }
+const MobileNavController = {
+    elements: {
+        button: null,
+        menu: null
+    },
+    isOpen: false,
+    touchStartX: 0,
 
-    validateElements() {
-        if (!this.button || !this.menu) {
+    initialize: function() {
+        this.cacheElements();
+        if (!this.validateElements()) return;
+
+        this.bindEvents();
+        this.setActiveLink();
+        this.updateARIA();
+    },
+
+    cacheElements: function() {
+        this.elements = {
+            button: document.querySelector('.mobile-menu-btn'),
+            menu: document.querySelector('.nav-links')
+        };
+    },
+
+    validateElements: function() {
+        if (!this.elements.button || !this.elements.menu) {
             utils.handleError(
                 new Error('Required navigation elements not found'),
-                'MobileNav'
+                'MobileNavController'
             );
             return false;
         }
         return true;
-    }
+    },
 
-    init() {
-        // Initialize touch events
-        this.initTouchEvents();
+    bindEvents: function() {
+        // Menu button click
+        this.elements.button.addEventListener('click', () => this.toggleMenu());
+
+        // Touch events
+        this.elements.menu.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+        this.elements.menu.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: true });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', this.handleOutsideClick.bind(this));
+
+        // ESC key to close menu
+        document.addEventListener('keydown', this.handleKeydown.bind(this));
+
+        // Resize handling
+        window.addEventListener('resize', this.handleResize.bind(this));
+    },
+
+    handleTouchStart: function(e) {
+        this.touchStartX = e.touches[0].clientX;
+    },
+
+    handleTouchMove: function(e) {
+        if (!this.isOpen) return;
         
-        // Set up event listeners
-        this.button.addEventListener('click', () => this.toggleMenu());
-        document.addEventListener('click', this.boundHandleClick);
-        document.addEventListener('keydown', this.boundHandleKeydown);
-        window.addEventListener('resize', this.boundHandleResize);
-
-        this.updateARIA();
-        this.setActiveLink();
-    }
-
-    initTouchEvents() {
-        this.menu.addEventListener('touchstart', (e) => {
-            this.touchStartX = e.touches[0].clientX;
-        }, { passive: true });
-
-        this.menu.addEventListener('touchmove', (e) => {
-            if (!this.isOpen) return;
-            
-            const deltaX = this.touchStartX - e.touches[0].clientX;
-            if (deltaX > 50) { // Swipe threshold
-                this.closeMenu();
-            }
-        }, { passive: true });
-    }
-
-    handleClick(e) {
-        if (this.isOpen && !this.menu.contains(e.target) && !this.button.contains(e.target)) {
+        const deltaX = this.touchStartX - e.touches[0].clientX;
+        if (deltaX > 50) { // Swipe threshold
             this.closeMenu();
         }
-    }
+    },
 
-    handleKeydown(e) {
+    handleOutsideClick: function(e) {
+        if (this.isOpen && 
+            !this.elements.menu.contains(e.target) && 
+            !this.elements.button.contains(e.target)) {
+            this.closeMenu();
+        }
+    },
+
+    handleKeydown: function(e) {
         if (e.key === 'Escape' && this.isOpen) {
             this.closeMenu();
         }
-    }
+    },
 
-    handleResize() {
+    handleResize: function() {
         if (window.innerWidth > 768 && this.isOpen) {
             this.closeMenu();
         }
-    }
+    },
 
-    toggleMenu() {
+    toggleMenu: function() {
         this.isOpen ? this.closeMenu() : this.openMenu();
-    }
+    },
 
-    openMenu() {
+    openMenu: function() {
         this.isOpen = true;
-        this.menu.classList.add('active');
+        this.elements.menu.classList.add('active');
         document.body.style.overflow = 'hidden';
         this.updateARIA();
-    }
+        utils.animationUtils.fadeIn(this.elements.menu);
+    },
 
-    closeMenu() {
+    closeMenu: function() {
         this.isOpen = false;
-        this.menu.classList.remove('active');
+        this.elements.menu.classList.remove('active');
         document.body.style.overflow = '';
         this.updateARIA();
-    }
+        utils.animationUtils.fadeOut(this.elements.menu);
+    },
 
-    updateARIA() {
-        this.button.setAttribute('aria-expanded', this.isOpen.toString());
-        this.menu.setAttribute('aria-hidden', (!this.isOpen).toString());
-    }
+    updateARIA: function() {
+        this.elements.button.setAttribute('aria-expanded', this.isOpen.toString());
+        this.elements.menu.setAttribute('aria-hidden', (!this.isOpen).toString());
+    },
 
-    setActiveLink() {
+    setActiveLink: function() {
         try {
-            const links = this.menu.querySelectorAll('a');
+            const links = this.elements.menu.querySelectorAll('a');
             const currentPath = window.location.pathname;
             
             links.forEach(link => {
@@ -111,27 +125,12 @@ class MobileNav {
                 link.setAttribute('aria-current', isActive ? 'page' : 'false');
             });
         } catch (error) {
-            utils.handleError(error, 'MobileNav.setActiveLink');
+            utils.handleError(error, 'MobileNavController.setActiveLink');
         }
     }
+};
 
-    // Cleanup method to remove event listeners
-    destroy() {
-        document.removeEventListener('click', this.boundHandleClick);
-        document.removeEventListener('keydown', this.boundHandleKeydown);
-        window.removeEventListener('resize', this.boundHandleResize);
-    }
-}
-
-// Initialize mobile navigation when DOM is ready
-let mobileNav;
+// Initialize mobile navigation
 document.addEventListener('DOMContentLoaded', () => {
-    mobileNav = new MobileNav();
-});
-
-// Cleanup on page unload
-window.addEventListener('unload', () => {
-    if (mobileNav) {
-        mobileNav.destroy();
-    }
+    MobileNavController.initialize();
 });

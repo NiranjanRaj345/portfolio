@@ -1,139 +1,132 @@
-// Hero Section Controller
-const HeroController = {
+const HomeController = {
     elements: {
         name: null,
         tagline: null,
         socialLinks: null,
-        particles: null
+        quickLinks: null
     },
 
-    init() {
+    initialize: async function() {
+        this.cacheElements();
+        if (!this.validateElements()) return;
+
+        await this.loadContent();
+        this.initQuickLinks();
+        this.initParticles();
+    },
+
+    cacheElements: function() {
         this.elements = {
             name: document.querySelector('.hero-name'),
             tagline: document.querySelector('.typing'),
             socialLinks: document.querySelector('.social-links'),
-            particles: document.getElementById('particles-js')
+            quickLinks: document.querySelector('.quick-links .container')
         };
-
-        if (!this.validateElements()) return;
-        
-        this.loadContent();
-        this.initTypingAnimation();
     },
 
-    validateElements() {
+    validateElements: function() {
         const missing = Object.entries(this.elements)
             .filter(([key, element]) => !element)
             .map(([key]) => key);
 
         if (missing.length > 0) {
             utils.handleError(
-                new Error(`Missing hero elements: ${missing.join(', ')}`),
-                'HeroController'
+                new Error(`Missing home elements: ${missing.join(', ')}`),
+                'HomeController'
             );
             return false;
         }
         return true;
     },
 
-    async loadContent() {
+    loadContent: async function() {
         try {
-            // Add loading state
+            const data = await utils.contentUtils.load();
+            if (!data) return;
+
+            // Update hero content with loading state
             this.elements.name.classList.add('loading');
             this.elements.tagline.classList.add('loading');
-            
-            const response = await fetch(utils.getContentPath());
-            const data = await response.json();
-            
-            // Update content
+
+            // Update hero content
             this.elements.name.textContent = data.hero.name;
             this.elements.tagline.textContent = data.hero.tagline;
-            
+
             // Generate social links
-            this.elements.socialLinks.innerHTML = this.generateSocialLinks(data.hero.social_links);
-            
+            this.elements.socialLinks.innerHTML = Object.entries(data.hero.social_links)
+                .map(([platform, url]) => `
+                    <a href="${url}" 
+                       target="_blank" 
+                       rel="noopener"
+                       aria-label="${platform}">
+                        <i class="fab fa-${platform.toLowerCase()}" 
+                           aria-hidden="true"></i>
+                    </a>
+                `).join('');
+
             // Remove loading state
             this.elements.name.classList.remove('loading');
             this.elements.tagline.classList.remove('loading');
+
+            // Initialize typing animation after content is loaded
+            this.elements.tagline.addEventListener('animationend', 
+                () => AnimationController.resetTypingAnimation());
+
         } catch (error) {
-            utils.handleError(error, 'HeroController.loadContent');
+            utils.handleError(error, 'HomeController.loadContent');
             this.handleLoadError();
         }
     },
 
-    generateSocialLinks(links) {
-        return Object.entries(links)
-            .map(([platform, url]) => `
-                <a href="${url}" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   aria-label="${platform}">
-                    <i class="fab fa-${platform.toLowerCase()}" aria-hidden="true"></i>
-                </a>
-            `).join('');
-    },
-
-    handleLoadError() {
-        this.elements.name.textContent = 'Error loading content';
-        this.elements.tagline.textContent = 'Please try again later';
-        this.elements.name.classList.add('error');
-        this.elements.tagline.classList.add('error');
-    },
-
-    initTypingAnimation() {
-        if (this.elements.tagline) {
-            this.elements.tagline.addEventListener('animationend', 
-                () => AnimationController.resetTypingAnimation());
+    handleLoadError: function() {
+        if (this.elements.name) {
+            this.elements.name.textContent = 'Error loading content';
+            this.elements.name.classList.add('error');
         }
-    }
-};
+        if (this.elements.tagline) {
+            this.elements.tagline.textContent = 'Please try again later';
+            this.elements.tagline.classList.add('error');
+        }
+    },
 
-// Quick Links Controller
-const QuickLinksController = {
-    init() {
-        const cards = document.querySelectorAll('.quick-links .card');
+    initQuickLinks: function() {
+        const cards = this.elements.quickLinks.querySelectorAll('.card');
         cards.forEach(card => {
-            card.addEventListener('click', () => {
+            // Add keyboard accessibility
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            
+            const handleNavigation = () => {
                 const href = card.dataset.href;
                 if (href) {
                     window.location.href = utils.getNavPath(href);
                 }
-            });
+            };
 
-            // Add keyboard accessibility
-            card.setAttribute('tabindex', '0');
+            card.addEventListener('click', handleNavigation);
             card.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    const href = card.dataset.href;
-                    if (href) {
-                        window.location.href = utils.getNavPath(href);
-                    }
+                    handleNavigation();
                 }
             });
         });
-    }
-};
+    },
 
-// Particles Controller
-const ParticlesController = {
-    init() {
+    initParticles: function() {
         const configPath = utils.formatImagePath('assets/js/particles-config.json');
-        particlesJS.load('particles-js', configPath, function(response) {
+        particlesJS.load('particles-js', configPath, (response) => {
             if (!response) {
                 utils.handleError(
                     new Error('Failed to load particles.js configuration'),
-                    'ParticlesController'
+                    'HomeController.initParticles'
                 );
             }
         });
     }
 };
 
-// Initialize home page
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     await includeHTML();
-    
-    HeroController.init();
-    QuickLinksController.init();
-    ParticlesController.init();
+    await HomeController.initialize();
 });
