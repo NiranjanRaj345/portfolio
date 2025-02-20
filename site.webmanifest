@@ -2,22 +2,53 @@
     "name": "Niranjan Rajkumar - Portfolio",
     "short_name": "NR Portfolio",
     "description": "Professional portfolio showcasing projects, skills, and experience in web development",
-    "start_url": "/",
+    "start_url": "./",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#007bff",
     "icons": [
         {
-            "src": "assets/images/favicon/android-chrome-192x192.png",
+            "src": "./assets/images/favicon/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "assets/images/favicon/android-chrome-512x512.png",
+            "src": "./assets/images/favicon/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
+        },
+        {
+            "src": "./assets/images/favicon/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "./assets/images/favicon/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "./assets/images/favicon/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
         }
-    ]
+    ],
+    "shortcuts": [
+        {
+            "name": "Projects",
+            "url": "./pages/projects.html",
+            "description": "View my projects"
+        },
+        {
+            "name": "Contact",
+            "url": "./pages/contact.html",
+            "description": "Contact me"
+        }
+    ],
+    "orientation": "any",
+    "categories": ["portfolio", "development", "professional"],
+    "prefer_related_applications": false
 }
