@@ -7,21 +7,47 @@ function debounce(func, wait) {
     };
 }
 
-// Include HTML content
+// Include HTML content with lazy loading
 async function includeHTML() {
     const elements = document.querySelectorAll('[data-include]');
-    for (let element of elements) {
-        try {
-            const file = element.getAttribute('data-include');
-            if (!file) continue;
-            
-            const response = await fetch(file);
-            element.innerHTML = await response.text();
-        } catch (error) {
-            utils.handleError(error, 'includeHTML');
-            element.innerHTML = 'Error loading content.';
-        }
-    }
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(async entry => {
+            if (entry.isIntersecting) {
+                const element = entry.target;
+                observer.unobserve(element);
+                
+                try {
+                    const file = element.getAttribute('data-include');
+                    if (!file) return;
+
+                    // Add loading state
+                    element.classList.add('loading');
+                    
+                    // Check sessionStorage cache first
+                    const cached = sessionStorage.getItem(file);
+                    if (cached) {
+                        element.innerHTML = cached;
+                    } else {
+                        const response = await fetch(file);
+                        const content = await response.text();
+                        element.innerHTML = content;
+                        // Cache the component
+                        sessionStorage.setItem(file, content);
+                    }
+                    
+                    element.classList.remove('loading');
+                } catch (error) {
+                    utils.handleError(error, 'includeHTML');
+                    element.innerHTML = 'Error loading content.';
+                    element.classList.add('error');
+                }
+            }
+        });
+    }, {
+        rootMargin: '50px' // Start loading slightly before element comes into view
+    });
+
+    elements.forEach(element => observer.observe(element));
 }
 
 // Navbar Controller

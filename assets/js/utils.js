@@ -41,17 +41,38 @@ const pathUtils = {
     }
 };
 
-// Content loading utilities
+// Content loading utilities with caching
 const contentUtils = {
+    cache: null,
+    cacheTimestamp: null,
+    cacheDuration: 5 * 60 * 1000, // 5 minutes
+
     async load() {
         try {
+            // Check cache validity
+            const now = Date.now();
+            if (this.cache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDuration)) {
+                return this.cache;
+            }
+
             const path = pathUtils.resolvePath('assets/data/content.json', { absolute: true });
             const response = await fetch(path);
-            return await response.json();
+            const data = await response.json();
+            
+            // Update cache
+            this.cache = data;
+            this.cacheTimestamp = now;
+            
+            return data;
         } catch (error) {
             handleError(error, 'contentUtils.load');
-            return null;
+            return this.cache || null; // Fallback to cached data if available
         }
+    },
+
+    clearCache() {
+        this.cache = null;
+        this.cacheTimestamp = null;
     },
 
     setElementText(selector, text, fallback = '') {
@@ -90,18 +111,28 @@ function createElement(tag, className = '', options = {}) {
     return element;
 }
 
-// Font Awesome loader
+// Font Awesome loader with performance optimization
 function loadFontAwesome() {
-    if (!document.querySelector('#font-awesome')) {
-        const fontAwesome = createElement('link', '', {
-            attributes: {
-                id: 'font-awesome',
-                rel: 'stylesheet',
-                href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
-            }
-        });
-        document.head.appendChild(fontAwesome);
-    }
+    if (document.querySelector('#font-awesome')) return;
+    
+    // Add stylesheet with media="print" to prevent render blocking
+    const fontAwesome = createElement('link', '', {
+        attributes: {
+            id: 'font-awesome',
+            rel: 'stylesheet',
+            href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+            media: 'print',
+            onload: "this.media='all'"  // Switch to 'all' once loaded
+        }
+    });
+
+    // Add noscript fallback
+    const noscript = createElement('noscript', '', {
+        innerHTML: `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">`
+    });
+
+    document.head.appendChild(fontAwesome);
+    document.head.appendChild(noscript);
 }
 
 // Error handler with console grouping

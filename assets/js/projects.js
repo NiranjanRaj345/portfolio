@@ -11,9 +11,10 @@ const ProjectsController = {
         utils.contentUtils.renderList('.projects-grid', projects, project => {
             const card = utils.createElement('div', 'project-card', {
                 innerHTML: `
-                    <img src="${utils.formatImagePath(project.image)}" 
+                    <img data-src="${utils.formatImagePath(project.image)}" 
                          alt="${project.title}"
-                         class="project-image"
+                         class="project-image lazy"
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
                          onerror="this.onerror=null; this.src='assets/images/project-placeholder.jpg';">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
@@ -39,11 +40,29 @@ const ProjectsController = {
                 `
             });
 
-            // Add loading state
+            // Lazy load images
             const img = card.querySelector('img');
-            img.classList.add('loading');
-            img.addEventListener('load', () => img.classList.remove('loading'));
-            img.addEventListener('error', () => img.classList.add('error'));
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        img.src = img.dataset.src;
+                        img.classList.add('loading');
+                        observer.unobserve(img);
+
+                        img.addEventListener('load', () => {
+                            img.classList.remove('loading');
+                            img.classList.add('loaded');
+                        });
+                        img.addEventListener('error', () => {
+                            img.classList.remove('loading');
+                            img.classList.add('error');
+                        });
+                    }
+                });
+            }, {
+                rootMargin: '50px'
+            });
+            observer.observe(img);
 
             card.addEventListener('click', () => this.showProjectDetail(project));
             return utils.animationUtils.addPageTransition(card);
