@@ -1,84 +1,36 @@
-// Core path utilities
+// Path utilities
 const pathUtils = {
     getBasePath() {
-        // Check if we're on the production domain
-        if (window.location.hostname.includes('.pages.dev') || 
-            window.location.hostname.includes('.github.io')) {
-            return '/portfolio';
-        }
-        return '';
+        return window.location.hostname.includes('.pages.dev') || window.location.hostname.includes('.github.io') ? '/portfolio' : '';
     },
 
-    isInPagesDirectory() {
-        return window.location.pathname.includes('/pages/');
-    },
-
-    isRootPage() {
-        const path = window.location.pathname;
-        return path === '/' || path.endsWith('index.html') || 
-               path === '/portfolio/' || path.endsWith('/portfolio/index.html');
-    },
-
-    normalizePath(path) {
-        return path.startsWith('/') ? path.slice(1) : path;
-    },
-
-    resolvePath(path, options = {}) {
+    resolvePath(path, absolute = false) {
         const basePath = this.getBasePath();
-        const cleanPath = this.normalizePath(path);
-        
-        // If we're in the pages directory and not requesting an absolute path
-        if (this.isInPagesDirectory() && !options.absolute) {
-            return `../${cleanPath}`;
-        }
-        
-        // If we're on the root page (index.html)
-        if (this.isRootPage()) {
-            return `${basePath}/${cleanPath}`;
-        }
-        
-        return `${basePath}/${cleanPath}`;
+        const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+        return absolute ? `${basePath}/${cleanPath}` : `../${cleanPath}`;
     }
 };
 
 // Content loading utilities with caching
 const contentUtils = {
     cache: null,
-    cacheTimestamp: null,
     cacheDuration: 5 * 60 * 1000, // 5 minutes
 
     async load() {
-        try {
-            // Check cache validity
-            const now = Date.now();
-            if (this.cache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDuration)) {
-                return this.cache;
-            }
+        const now = Date.now();
+        if (this.cache && (now - this.cache.timestamp < this.cacheDuration)) {
+            return this.cache.data;
+        }
 
-            const path = pathUtils.resolvePath('assets/data/content.json', { absolute: true });
+        try {
+            const path = pathUtils.resolvePath('assets/data/content.json', true);
             const response = await fetch(path);
             const data = await response.json();
-            
-            // Update cache
-            this.cache = data;
-            this.cacheTimestamp = now;
-            
+            this.cache = { data, timestamp: now };
             return data;
         } catch (error) {
             handleError(error, 'contentUtils.load');
-            return this.cache || null; // Fallback to cached data if available
-        }
-    },
-
-    clearCache() {
-        this.cache = null;
-        this.cacheTimestamp = null;
-    },
-
-    setElementText(selector, text, fallback = '') {
-        const element = document.querySelector(selector);
-        if (element) {
-            element.textContent = text || fallback;
+            return this.cache ? this.cache.data : null;
         }
     },
 
@@ -87,12 +39,7 @@ const contentUtils = {
         if (!container || !items) return;
 
         const fragment = document.createDocumentFragment();
-        items.forEach(item => {
-            const element = renderItem(item);
-            if (element) {
-                fragment.appendChild(element);
-            }
-        });
+        items.forEach(item => fragment.appendChild(renderItem(item)));
         container.appendChild(fragment);
     }
 };
@@ -104,9 +51,7 @@ function createElement(tag, className = '', options = {}) {
     if (options.innerHTML) element.innerHTML = options.innerHTML;
     if (options.text) element.textContent = options.text;
     if (options.attributes) {
-        Object.entries(options.attributes).forEach(([key, value]) => {
-            element.setAttribute(key, value);
-        });
+        Object.entries(options.attributes).forEach(([key, value]) => element.setAttribute(key, value));
     }
     return element;
 }
@@ -114,19 +59,17 @@ function createElement(tag, className = '', options = {}) {
 // Font Awesome loader with performance optimization
 function loadFontAwesome() {
     if (document.querySelector('#font-awesome')) return;
-    
-    // Add stylesheet with media="print" to prevent render blocking
+
     const fontAwesome = createElement('link', '', {
         attributes: {
             id: 'font-awesome',
             rel: 'stylesheet',
             href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
             media: 'print',
-            onload: "this.media='all'"  // Switch to 'all' once loaded
+            onload: "this.media='all'"
         }
     });
 
-    // Add noscript fallback
     const noscript = createElement('noscript', '', {
         innerHTML: `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">`
     });
@@ -135,12 +78,9 @@ function loadFontAwesome() {
     document.head.appendChild(noscript);
 }
 
-// Error handler with console grouping
+// Error handler
 function handleError(error, context) {
-    console.group(`Error in ${context}`);
-    console.error(error);
-    console.trace('Stack trace:');
-    console.groupEnd();
+    console.error(`Error in ${context}:`, error);
 }
 
 // Animation utilities
@@ -164,37 +104,6 @@ const animationUtils = {
     }
 };
 
-// Get content.json path
-function getContentPath() {
-    return pathUtils.resolvePath('assets/data/content.json', { absolute: true });
-}
-
-// Format image path
-function formatImagePath(path) {
-    return pathUtils.resolvePath(path);
-}
-
-// Get navigation path
-function getNavPath(path) {
-    return pathUtils.resolvePath(path, { absolute: path.startsWith('/') });
-}
-
-// Update navbar links
-function updateNavLinks() {
-    const nav = document.querySelector('.navbar');
-    if (!nav) return;
-
-    const links = nav.querySelectorAll('a');
-    links.forEach(link => {
-        const originalHref = link.getAttribute('href');
-        if (link.id === 'home-link') {
-            link.href = `${pathUtils.getBasePath()}/index.html`;
-        } else {
-            link.href = getNavPath(originalHref);
-        }
-    });
-}
-
 // Export utilities
 window.utils = {
     pathUtils,
@@ -202,12 +111,17 @@ window.utils = {
     animationUtils,
     createElement,
     loadFontAwesome,
-    handleError,
-    getContentPath,
-    formatImagePath,
-    getNavPath,
-    updateNavLinks
+    handleError
 };
 
 // Initialize navbar links
-window.addEventListener('load', updateNavLinks);
+window.addEventListener('load', () => {
+    const nav = document.querySelector('.navbar');
+    if (!nav) return;
+
+    const links = nav.querySelectorAll('a');
+    links.forEach(link => {
+        const originalHref = link.getAttribute('href');
+        link.href = link.id === 'home-link' ? `${pathUtils.getBasePath()}/index.html` : pathUtils.resolvePath(originalHref, originalHref.startsWith('/'));
+    });
+});
