@@ -3,9 +3,10 @@
     "name": "Niranjan Rajkumar",
     "tagline": "Building Scalable Solutions, One Line of Code at a Time...",
     "social_links": {
-      "github": "https://github.com/johndoe",
-      "linkedin": "https://linkedin.com/in/johndoe",
-      "twitter": "https://twitter.com/johndoe"
+      "github": "https://github.com/NiranjanRaj345",
+      "linkedin": "https://www.linkedin.com/in/-niranjan/",
+      "X": "https://x.com/NiranjanRaj345",
+      "instagram": "https://www.instagram.com/monk._.__/"
     }
   },
   "projects": [
@@ -16,7 +17,7 @@
       "solution": "Implemented advanced NLP with GPT-4 for more natural and context-aware responses",
       "tech": ["Python", "Flask", "OpenAI API", "Redis", "Docker"],
       "demo": "https://chatbot-demo.example.com",
-      "github": "https://github.com/johndoe/chatbot",
+      "github": "https://github.com/NiranjanRaj345/chatbot",
       "image": "assets/images/chatbot-project.jpg"
     },
     {
@@ -26,8 +27,8 @@
       "solution": "Created a scalable platform with real-time inventory tracking and analytics",
       "tech": ["React", "Node.js", "MongoDB", "AWS", "Stripe"],
       "demo": "https://ecommerce-demo.example.com",
-      "github": "https://github.com/johndoe/ecommerce",
-      "image": "assets/images/ecommerce-project.jpg"
+      "github": "https://github.com/NiranjanRaj345/ecommerce",
+      "image": "assets/images/ecommerce.jpg"
     }
   ],
   "skills": [

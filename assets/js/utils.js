@@ -12,18 +12,54 @@ function loadFontAwesome() {
 // Path handling for content.json based on current page depth
 function getContentPath() {
     const path = window.location.pathname;
-    return path.includes('/pages/') ? '../assets/data/content.json' : './assets/data/content.json';
+    return path.includes('/pages/') ? '../assets/data/content.json' : 'assets/data/content.json';
 }
 
 // Format relative image paths based on page location
 function formatImagePath(path) {
-    return window.location.pathname.includes('/pages/') ? `../${path}` : path;
+    const base = window.location.pathname.includes('/pages/') ? '..' : '.';
+    return `${base}/${path}`;
 }
 
-// Generic error handler
+// Get base URL for assets
+function getBaseUrl() {
+    return window.location.pathname.includes('/pages/') ? '..' : '.';
+}
+
+// Enhanced error handler with user feedback
 function handleError(error, context) {
     console.error(`Error in ${context}:`, error);
-    // You could add more error handling logic here
+    
+    // Create or get error container
+    let errorContainer = document.getElementById('error-container');
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.id = 'error-container';
+        errorContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+            max-width: 300px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(errorContainer);
+    }
+
+    // Show user-friendly error message
+    const userMessage = error.message || 'An unexpected error occurred. Please try again.';
+    errorContainer.textContent = userMessage;
+    errorContainer.style.display = 'block';
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        errorContainer.style.display = 'none';
+    }, 5000);
 }
 
 // Utility function to create elements with classes
@@ -40,5 +76,6 @@ window.utils = {
     getContentPath,
     formatImagePath,
     handleError,
-    createElement
+    createElement,
+    getBaseUrl
 };

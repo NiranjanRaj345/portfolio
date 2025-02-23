@@ -5,9 +5,27 @@ async function includeHTML() {
         const file = element.getAttribute('data-include');
         if (file) {
             try {
-                const response = await fetch(file);
+                const baseUrl = utils.getBaseUrl();
+                const fullPath = `${baseUrl}/${file}`;
+                const response = await fetch(fullPath);
                 const html = await response.text();
                 element.innerHTML = html;
+                
+                // If this is the navbar, update its links based on current location
+                if (file.includes('navbar.html')) {
+                    const isInPagesDir = window.location.pathname.includes('/pages/');
+                    const navLinks = element.querySelectorAll('.nav-links a');
+                    navLinks.forEach(link => {
+                        if (isInPagesDir) {
+                            // When in /pages/, convert paths to relative
+                            if (link.getAttribute('href') === 'index.html') {
+                                link.href = '../index.html';
+                            } else if (link.getAttribute('href').startsWith('pages/')) {
+                                link.href = link.getAttribute('href').replace('pages/', '');
+                            }
+                        }
+                    });
+                }
             } catch (error) {
                 utils.handleError(error, 'includeHTML');
                 element.innerHTML = 'Error loading content.';

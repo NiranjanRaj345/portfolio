@@ -32,7 +32,7 @@ async function loadSkillsAndCerts() {
         // Set initial state to show all skills
         filterSkills('all');
     } catch (error) {
-        console.error('Error loading skills and certifications:', error);
+        utils.handleError(error, 'loadSkillsAndCerts');
     }
 }
 
@@ -118,6 +118,10 @@ function filterSkills(category) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    await includeHTML();
-    loadSkillsAndCerts();
+    try {
+        await includeHTML();
+        await loadSkillsAndCerts();
+    } catch (error) {
+        utils.handleError(error, 'skills initialization');
+    }
 });
