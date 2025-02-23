@@ -1,165 +1,130 @@
-// Debounce utility
-function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
-
-// Include HTML content with lazy loading
+// Include HTML content
 async function includeHTML() {
     const elements = document.querySelectorAll('[data-include]');
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(async entry => {
-            if (entry.isIntersecting) {
-                const element = entry.target;
-                observer.unobserve(element);
-                
-                try {
-                    const file = element.getAttribute('data-include');
-                    if (!file) return;
-
-                    // Add loading state
-                    element.classList.add('loading');
-                    
-                    // Check sessionStorage cache first
-                    const cached = sessionStorage.getItem(file);
-                    if (cached) {
-                        element.innerHTML = cached;
-                    } else {
-                        const response = await fetch(file);
-                        const content = await response.text();
-                        element.innerHTML = content;
-                        // Cache the component
-                        sessionStorage.setItem(file, content);
-                    }
-                    
-                    element.classList.remove('loading');
-                } catch (error) {
-                    utils.handleError(error, 'includeHTML');
-                    element.innerHTML = 'Error loading content.';
-                    element.classList.add('error');
-                }
+    for (let element of elements) {
+        const file = element.getAttribute('data-include');
+        if (file) {
+            try {
+                const response = await fetch(file);
+                const html = await response.text();
+                element.innerHTML = html;
+            } catch (error) {
+                utils.handleError(error, 'includeHTML');
+                element.innerHTML = 'Error loading content.';
             }
-        });
-    }, {
-        rootMargin: '50px' // Start loading slightly before element comes into view
-    });
-
-    elements.forEach(element => observer.observe(element));
+        }
+    }
 }
 
-// Navbar Controller
-const NavbarController = {
-    navbar: null,
-    indicator: null,
-    lastScroll: 0,
-    initialized: false,
 
-    init() {
-        this.navbar = document.querySelector('.navbar');
-        this.indicator = document.querySelector('.nav-indicator');
-        if (!this.navbar || this.initialized) return;
-        
-        this.initialized = true;
-        this.setupScrollHandler();
-        this.updateIndicator();
-    },
-
-    setupScrollHandler() {
-        window.addEventListener('scroll', debounce(() => {
-            this.handleScroll();
-            this.updateIndicator();
-        }, 10));
-    },
-
-    handleScroll() {
+// Navbar Scroll Behavior
+function initNavbar() {
+    const navbar = document.querySelector('.navbar');
+    let lastScroll = 0;
+    
+    window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
         
-        // Handle navbar visibility and style
-        if (currentScroll > this.lastScroll && currentScroll > 50) {
-            this.navbar.classList.add('scrolled');
-            this.navbar.style.transform = 'translateY(-100%)';
+        // Handle navbar visibility based on scroll direction
+        if (currentScroll > lastScroll && currentScroll > 50) {
+            // Scrolling down - shrink navbar
+            navbar.classList.add('scrolled');
+            navbar.style.transform = 'translateY(-100%)';
         } else {
-            this.navbar.style.transform = 'translateY(0)';
-            this.navbar.classList.toggle('scrolled', currentScroll > 50);
-        }
-        
-        this.lastScroll = currentScroll;
-    },
-
-    updateIndicator() {
-        const activeLink = document.querySelector('.nav-links a.active');
-        if (activeLink && this.indicator) {
-            this.indicator.style.width = `${activeLink.offsetWidth}px`;
-            this.indicator.style.left = `${activeLink.offsetLeft}px`;
-        }
-    }
-};
-
-// Navigation Controller
-const NavigationController = {
-    init() {
-        this.initSmoothScroll();
-        this.initActiveNavLinks();
-    },
-
-    initSmoothScroll() {
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = document.querySelector(anchor.getAttribute('href'));
-                target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-    },
-
-    initActiveNavLinks() {
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-links a');
-        
-        window.addEventListener('scroll', debounce(() => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (scrollY >= sectionTop - 60) {
-                    current = section.getAttribute('id');
-                }
-            });
+            // Scrolling up - expand navbar
+            navbar.classList.remove('scrolled');
+            navbar.style.transform = 'translateY(0)';
             
-            navLinks.forEach(link => {
-                link.classList.toggle('active', link.getAttribute('href').includes(current));
-            });
-            NavbarController.updateIndicator();
-        }, 100));
-    }
-};
-
-// Animation Controller
-const AnimationController = {
-    resetTypingAnimation() {
-        const typing = document.querySelector('.typing');
-        if (!typing) return;
+            // Still add scrolled class if we're not at the top
+            if (currentScroll > 50) {
+                navbar.classList.add('scrolled');
+            }
+        }
         
-        typing.style.animation = 'none';
-        typing.offsetHeight; // Trigger reflow
-        typing.style.animation = null;
+        // Update nav indicator position
+        const activeLink = document.querySelector('.nav-links a.active');
+        if (activeLink) {
+            const indicator = document.querySelector('.nav-indicator');
+            indicator.style.width = `${activeLink.offsetWidth}px`;
+            indicator.style.left = `${activeLink.offsetLeft}px`;
+        }
+        
+        lastScroll = currentScroll;
+    });
+
+    // Initialize nav indicator position
+    const activeLink = document.querySelector('.nav-links a.active');
+    if (activeLink) {
+        const indicator = document.querySelector('.nav-indicator');
+        indicator.style.width = `${activeLink.offsetWidth}px`;
+        indicator.style.left = `${activeLink.offsetLeft}px`;
     }
-};
+}
+
+// Smooth Scrolling
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// Update Active Navigation Link
+function updateActiveNavLink() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (scrollY >= sectionTop - 60) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// Typing Animation Reset
+function resetTypingAnimation() {
+    const typing = document.querySelector('.typing');
+    typing.style.animation = 'none';
+    typing.offsetHeight; // Trigger reflow
+    typing.style.animation = null;
+}
 
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', async () => {
+    // Load Font Awesome
     utils.loadFontAwesome();
+
+    // Initialize core functionalities
     await includeHTML();
-    
-    NavbarController.init();
-    NavigationController.init();
+    initNavbar();
+    initSmoothScroll();
+    updateActiveNavLink();
 });
 
 // Handle page transitions
 window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
-        window.location.reload(); // Force fresh load on back/forward
+        // Page was loaded from cache (browser back/forward)
+        loadContent();
     }
 });

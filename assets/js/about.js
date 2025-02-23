@@ -1,60 +1,59 @@
-const AboutController = {
-    init: async function() {
-        const data = await utils.contentUtils.load();
-        if (!data) return;
-
-        this.renderBio(data.about);
-        this.renderTimeline(data.about.timeline);
-        this.renderLists(data.about);
-    },
-
-    renderBio: function(about) {
-        utils.contentUtils.setElementText('.bio-text', about.bio, 
-            'Bio content unavailable');
-    },
-
-    renderTimeline: function(timeline) {
-        utils.contentUtils.renderList('.timeline', timeline, item => {
-            const timelineItem = utils.createElement('div', 'timeline-item', {
-                innerHTML: `
-                    <div class="timeline-content">
-                        <div class="timeline-year">${item.year}</div>
-                        <h3 class="timeline-title">${item.title}</h3>
-                        <div class="timeline-company">${item.company}</div>
-                        <p>${item.description}</p>
-                    </div>
-                `
-            });
-            return utils.animationUtils.addPageTransition(timelineItem);
+async function loadAboutContent() {
+    try {
+        const response = await fetch(utils.getContentPath());
+        const data = await response.json();
+        
+        // Load Bio
+        document.querySelector('.bio-text').textContent = data.about.bio;
+        
+        // Load Timeline
+        const timeline = document.querySelector('.timeline');
+        data.about.timeline.forEach(item => {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = 'timeline-item page-transition';
+            
+            timelineItem.innerHTML = `
+                <div class="timeline-content">
+                    <div class="timeline-year">${item.year}</div>
+                    <h3 class="timeline-title">${item.title}</h3>
+                    <div class="timeline-company">${item.company}</div>
+                    <p>${item.description}</p>
+                </div>
+            `;
+            
+            timeline.appendChild(timelineItem);
         });
-    },
-
-    renderLists: function(about) {
-        // Render hobbies
-        utils.contentUtils.renderList('.hobbies-list', about.hobbies, hobby => 
-            utils.createElement('li', '', {
-                innerHTML: `<i class="fas fa-chevron-right"></i>${hobby}`
-            })
-        );
-
-        // Render learning items
-        utils.contentUtils.renderList('.learning-list', about.learning, item =>
-            utils.createElement('li', '', {
-                innerHTML: `<i class="fas fa-graduation-cap"></i>${item}`
-            })
-        );
-
-        // Render fun facts
-        utils.contentUtils.renderList('.fun-facts-list', about.funFacts, fact =>
-            utils.createElement('li', '', {
-                text: fact
-            })
-        );
+        
+        // Load Hobbies
+        const hobbiesList = document.querySelector('.hobbies-list');
+        data.about.hobbies.forEach(hobby => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-chevron-right"></i>${hobby}`;
+            hobbiesList.appendChild(li);
+        });
+        
+        // Load Learning Items
+        const learningList = document.querySelector('.learning-list');
+        data.about.learning.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-graduation-cap"></i>${item}`;
+            learningList.appendChild(li);
+        });
+        
+        // Load Fun Facts
+        const funFactsList = document.querySelector('.fun-facts-list');
+        data.about.funFacts.forEach(fact => {
+            const li = document.createElement('li');
+            li.textContent = fact;
+            funFactsList.appendChild(li);
+        });
+    } catch (error) {
+        console.error('Error loading about content:', error);
     }
-};
+}
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     await includeHTML();
-    AboutController.init();
+    loadAboutContent();
 });
