@@ -26,9 +26,13 @@
     overflow: hidden;
     border-right: 2px solid var(--text-color);
     white-space: nowrap;
-    animation: 
-        typing 3.5s steps(40, end),
-        blink 0.75s step-end infinite;
+    animation: typing 3.5s steps(40, end);
+}
+
+/* Add a separate class for cursor animation */
+.typing-cursor {
+    border-right: 2px solid var(--text-color);
+    animation: blink 0.75s step-end infinite;
 }
 
 /* Stagger fade in animation for cards */

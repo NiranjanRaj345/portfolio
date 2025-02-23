@@ -32,9 +32,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('particles.js loaded');
     });
 
-    // Add typing animation reset
+    // Add cursor after typing animation
     const typing = document.querySelector('.typing');
     if (typing) {
-        typing.addEventListener('animationend', resetTypingAnimation);
+        typing.addEventListener('animationend', () => {
+            typing.classList.add('typing-cursor');
+        });
     }
 });
